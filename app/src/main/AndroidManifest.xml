@@ -3,6 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ugps.whatsapp">
 
+    <uses-feature
+        android:name="android.hardware.camera2"
+        android:required="true"
+        />
+
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission

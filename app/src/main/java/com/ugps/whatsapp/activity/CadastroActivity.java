@@ -18,6 +18,7 @@ import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
 import com.ugps.whatsapp.R;
 import com.ugps.whatsapp.config.ConfiguracaoFirebase;
 import com.ugps.whatsapp.helper.Base64Custom;
+import com.ugps.whatsapp.helper.UsuarioFirebase;
 import com.ugps.whatsapp.model.Usuario;
 
 public class CadastroActivity extends AppCompatActivity {
@@ -49,6 +50,8 @@ public class CadastroActivity extends AppCompatActivity {
 
                     Toast.makeText(CadastroActivity.this, "Sucesso ao cadastrar usuário!", Toast.LENGTH_SHORT).show();
                     finish();
+
+                    UsuarioFirebase.atualizarNomeUsuario( usuario.getNome() );
 
                     try{
 
