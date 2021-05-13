@@ -5,17 +5,14 @@
     <item android:id="@+id/menuPesquisa"
         android:title="Pesquisar"
         app:showAsAction="always"
-        android:icon="@drawable/ic_pesquisa_branco"
-    />
+        android:icon="@drawable/ic_pesquisa_branco"/>
 
     <item android:id="@+id/menuConfiguiracoes"
         android:title="Configuracoes"
-        app:showAsAction="never"
-    />
+        app:showAsAction="never"/>
 
     <item android:id="@+id/menuSair"
         android:title="Sair"
-        app:showAsAction="never"
-        />
+        app:showAsAction="never"/>
 
 </menu>

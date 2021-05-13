@@ -1,5 +1,6 @@
 package com.ugps.whatsapp.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,16 +12,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.ugps.whatsapp.R;
+import com.ugps.whatsapp.activity.ChatActivity;
 import com.ugps.whatsapp.adapter.ConversasAdapter;
 import com.ugps.whatsapp.config.ConfiguracaoFirebase;
+import com.ugps.whatsapp.helper.RecyclerItemClickListener;
 import com.ugps.whatsapp.helper.UsuarioFirebase;
 import com.ugps.whatsapp.model.Conversa;
+import com.ugps.whatsapp.model.Usuario;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,11 +59,45 @@ public class ConversasFragment extends Fragment {
         recyclerViewConversas.setHasFixedSize( true );
         recyclerViewConversas.setAdapter( adapter );
 
+        //Configurar evento de clique
+        recyclerViewConversas.addOnItemTouchListener(
+
+                new RecyclerItemClickListener(
+                        getActivity(),
+                        recyclerViewConversas,
+                        new RecyclerItemClickListener.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(View view, int position) {
+
+                                Conversa conversaSelecionada = listaConversas.get( position );
+
+                                Intent i = new Intent( getActivity(), ChatActivity.class);
+                                i.putExtra("chatContato", conversaSelecionada.getUsuarioExibicao() );
+                                startActivity( i );
+
+                            }
+
+                            @Override
+                            public void onLongItemClick(View view, int position) {
+
+                            }
+
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                            }
+                        }
+                )
+
+        );
+
         //Configura conversasRef
         String identificadorUsuario = UsuarioFirebase.getIdentificadorUsuario();
         database = ConfiguracaoFirebase.getFirebaseDatabase();
         conversasRef = database.child("conversas")
                                .child( identificadorUsuario );
+
+
 
         return view;
 
@@ -77,6 +116,38 @@ public class ConversasFragment extends Fragment {
         super.onStop();
 
         conversasRef.removeEventListener( childEventListenerConversas );
+
+    }
+
+    public void pesquisarConversas( String texto ){
+
+        //Vamos percorrer a lista de Conversa existente e abastecer uma nova lista que faça par com a pesquisa
+        List<Conversa> listaConversasBusca = new ArrayList<>();
+
+        for( Conversa conversa : listaConversas ){
+
+            String nome = conversa.getUsuarioExibicao().getNome().toLowerCase();
+            String ultimaMsg = conversa.getUltimaMensagem().toLowerCase();
+
+            if( nome.contains( texto ) || ultimaMsg.contains( texto ) ){
+
+                listaConversasBusca.add( conversa );
+
+            }
+
+            adapter = new ConversasAdapter( listaConversasBusca , getActivity() );
+            recyclerViewConversas.setAdapter( adapter );
+            adapter.notifyDataSetChanged();
+
+        }
+
+    }
+
+    public void recarregarConversas(  ){
+
+        adapter = new ConversasAdapter( listaConversas , getActivity() );
+        recyclerViewConversas.setAdapter( adapter );
+        adapter.notifyDataSetChanged();
 
     }
 
@@ -115,5 +186,7 @@ public class ConversasFragment extends Fragment {
         });
 
     }
+
+
 
 }

@@ -12,6 +12,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.miguelcatalan.materialsearchview.MaterialSearchView;
 import com.ogaclejapan.smarttablayout.SmartTabLayout;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItemAdapter;
 import com.ogaclejapan.smarttablayout.utils.v4.FragmentPagerItems;
@@ -23,6 +24,7 @@ import com.ugps.whatsapp.fragment.ConversasFragment;
 public class MainActivity extends AppCompatActivity {
 
     private FirebaseAuth autenticacao;
+    private MaterialSearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
 
         autenticacao = ConfiguracaoFirebase.getFirebaseAutenticacao();
 
+        searchView = findViewById(R.id.materialSearchPrincipal);
         Toolbar toolbar = findViewById(R.id.toolbarPrincipal);
         toolbar.setTitle("WhatsApp");
         setSupportActionBar( toolbar );
@@ -39,15 +42,60 @@ public class MainActivity extends AppCompatActivity {
         FragmentPagerItemAdapter adapter = new FragmentPagerItemAdapter(
                 getSupportFragmentManager(),
                 FragmentPagerItems.with(this)
-                .add("Conversas", ConversasFragment.class)
-                .add("Contatos", ContatosFragment.class)
+                .add("Conversas", ConversasFragment.class) //como é a primeira página, recebe o índice 0
+                .add("Contatos", ContatosFragment.class)   // essa página recebe o índice 1
                 .create()
         );
         ViewPager viewPager = findViewById(R.id.viewPager);
-        viewPager.setAdapter( adapter );
+        viewPager.setAdapter( adapter ); //os fragmentos ficam dentro do viewpager
 
         SmartTabLayout viewPagerTab = findViewById(R.id.viewPagerTab);
         viewPagerTab.setViewPager( viewPager );
+
+        //Configuração do search view
+        searchView = findViewById( R.id.materialSearchPrincipal );
+
+        //Listener para o search view
+        searchView.setOnSearchViewListener(new MaterialSearchView.SearchViewListener() {
+            @Override
+            public void onSearchViewShown() {
+                //aqui é para quando o usuário abre o searchView
+            }
+
+            @Override
+            public void onSearchViewClosed() {
+
+                ConversasFragment fragment = (ConversasFragment) adapter.getPage( 0 );
+                fragment.recarregarConversas();
+
+            }
+        });
+
+        //Listener para caixa de texto
+        searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                //aqui é executado quando ele termina de escrever e clica na lupinha do teclado
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //aqui é executando em tempo de escrita
+
+                ConversasFragment fragment = (ConversasFragment) adapter.getPage( 0 );
+                if( newText != null && newText.isEmpty()){
+
+                    fragment.pesquisarConversas( newText.toLowerCase() ); //passa o texto digitado tudo em minúsculas
+
+                }
+
+
+                return true;
+            }
+        });
+
+
 
     }
 
@@ -56,6 +104,10 @@ public class MainActivity extends AppCompatActivity {
 
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
+
+        //Configurar botao de pesquisa
+        MenuItem item = menu.findItem( R.id.menuPesquisa ); //peguei a lupinha
+        searchView.setMenuItem( item );
 
         return super.onCreateOptionsMenu(menu);
     }
