@@ -43,6 +43,7 @@ public class ContatosAdapter extends RecyclerView.Adapter<ContatosAdapter.MyView
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
             Usuario usuario = contatos.get( position );
+            boolean cabecalho = usuario.getEmail().isEmpty();
 
             holder.nome.setText( usuario.getNome() );
             holder.email.setText( usuario.getEmail() );
@@ -54,8 +55,16 @@ public class ContatosAdapter extends RecyclerView.Adapter<ContatosAdapter.MyView
 
             } else {
 
-                holder.foto.setImageResource( R.drawable.padrao );
+                if ( cabecalho ){
 
+                    holder.foto.setImageResource( R.drawable.icone_grupo ); //foto verde de novo grupo
+                    holder.email.setVisibility( View.GONE ); //quero sumir com o campo de email, assim centraliza o nome verticalmente
+
+                } else {
+
+                    holder.foto.setImageResource( R.drawable.padrao );
+
+                }
             }
 
     }

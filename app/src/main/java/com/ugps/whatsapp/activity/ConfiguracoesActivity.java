@@ -147,6 +147,7 @@ public class ConfiguracoesActivity extends AppCompatActivity {
 
             }
         });
+
     }
 
     @Override

@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.ugps.whatsapp.R;
 import com.ugps.whatsapp.activity.ChatActivity;
+import com.ugps.whatsapp.activity.GrupoActivity;
 import com.ugps.whatsapp.adapter.ContatosAdapter;
 import com.ugps.whatsapp.config.ConfiguracaoFirebase;
 import com.ugps.whatsapp.helper.RecyclerItemClickListener;
@@ -77,9 +78,22 @@ public class ContatosFragment extends Fragment {
                             public void onItemClick(View view, int position) {
 
                                 Usuario usuarioSelecionado = listaContatos.get(position);
-                                Intent i = new Intent( getActivity(), ChatActivity.class);
-                                i.putExtra("chatContato", usuarioSelecionado);
-                                startActivity( i );
+
+                                boolean cabecalho = usuarioSelecionado.getEmail().isEmpty(); //se eu clicar no "novo grupo", vou saber que é ele pois o e-mail está vazio
+
+                                if( cabecalho ){
+
+                                    Intent i = new Intent( getActivity() , GrupoActivity.class );
+                                    startActivity( i );
+
+                                } else {
+
+                                    Intent i = new Intent( getActivity(), ChatActivity.class);
+                                    i.putExtra("chatContato", usuarioSelecionado);
+                                    startActivity( i );
+
+                                }
+
 
                             }
 
@@ -96,6 +110,13 @@ public class ContatosFragment extends Fragment {
 
                 )
         );
+
+        //Criando grupos
+        Usuario itemGrupo = new Usuario();
+        itemGrupo.setNome("Novo grupo");
+        itemGrupo.setEmail("");
+
+        listaContatos.add( itemGrupo );
 
         return view;
 
