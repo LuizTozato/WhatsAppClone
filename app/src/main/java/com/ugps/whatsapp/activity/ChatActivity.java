@@ -55,6 +55,7 @@ public class ChatActivity extends AppCompatActivity {
     private EditText editMensagem;
     private ImageView imageCamera;
     private Usuario usuarioDestinatario;
+    private Usuario usuarioRemetente;
     private DatabaseReference database;
     private StorageReference storage;
     private DatabaseReference mensagensRef;
@@ -91,6 +92,7 @@ public class ChatActivity extends AppCompatActivity {
 
         //Recuperar dados do usuário remetente
         idUsuarioRemetente = UsuarioFirebase.getIdentificadorUsuario();
+        usuarioRemetente = UsuarioFirebase.getDadosUsuarioLogado();
 
         //Recuperar dados do usuário destinatario
         Bundle bundle = getIntent().getExtras();
@@ -269,8 +271,12 @@ public class ChatActivity extends AppCompatActivity {
                 //salvar a mensagem para o destinatário
                 salvarMensagem( idUsuarioDestinatario , idUsuarioRemetente , mensagem );
 
+                //salvar conversa para o remetente
+                salvarConversa( idUsuarioRemetente, idUsuarioDestinatario, usuarioDestinatario ,mensagem , false );
+
                 //salvar conversa para um único destinatário
-                salvarConversa( mensagem , false );
+                Usuario usuarioRemetente = UsuarioFirebase.getDadosUsuarioLogado();
+                salvarConversa( idUsuarioDestinatario, idUsuarioRemetente, usuarioRemetente, mensagem , false );
 
             } else {
             //AQUI É O ENVIO DE UMA MENSAGEM DE GRUPO
@@ -284,12 +290,13 @@ public class ChatActivity extends AppCompatActivity {
                     Mensagem mensagem = new Mensagem();
                     mensagem.setIdUsuario( idUsuarioLogadoGrupo );
                     mensagem.setMensagem( textoMensagem );
+                    mensagem.setNome( usuarioRemetente.getNome() );
 
                     //salvar mensagem para o membro
                     salvarMensagem( idRemetenteGrupo, idUsuarioDestinatario, mensagem );
 
                     //salvar conversa para o grupo
-                    salvarConversa( mensagem , true );
+                    salvarConversa( idRemetenteGrupo, idUsuarioDestinatario, usuarioDestinatario, mensagem , true );
 
                 }
             }
@@ -302,7 +309,7 @@ public class ChatActivity extends AppCompatActivity {
 
     }
 
-    private void salvarConversa( Mensagem msg , boolean isGroup ){
+    private void salvarConversa(String idRemetente, String idDestinatario, Usuario usuarioExibicao, Mensagem msg , boolean isGroup ){
 
         //Salvar conversa remetente
         Conversa conversaRemetente = new Conversa();
@@ -319,8 +326,8 @@ public class ChatActivity extends AppCompatActivity {
         } else { //CONVERSA NORMAL
 
             //Conversa convencional
-            conversaRemetente.setUsuarioExibicao(usuarioDestinatario); //sempre com quem estou conversando
-            conversaRemetente.setIsGroup("false"); //não precisaria pois já é default do construtor
+            conversaRemetente.setUsuarioExibicao( usuarioExibicao ); //sempre com quem estou conversando
+            conversaRemetente.setIsGroup( "false" ); //não precisaria pois já é default do construtor
 
         }
 

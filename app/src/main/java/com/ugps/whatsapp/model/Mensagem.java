@@ -3,10 +3,20 @@ package com.ugps.whatsapp.model;
 public class Mensagem {
 
     private String idUsuario; //quem está enviando a mensagem
+    private String nome;
     private String mensagem;
     private String imagem;
 
     public Mensagem() {
+        this.setNome("");
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 
     public String getIdUsuario() {
