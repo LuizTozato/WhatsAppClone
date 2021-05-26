@@ -39,14 +39,14 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar( toolbar );
 
         //Configurar abas
-        FragmentPagerItemAdapter adapter = new FragmentPagerItemAdapter(
+        final FragmentPagerItemAdapter adapter = new FragmentPagerItemAdapter(
                 getSupportFragmentManager(),
                 FragmentPagerItems.with(this)
                 .add("Conversas", ConversasFragment.class) //como é a primeira página, recebe o índice 0
                 .add("Contatos", ContatosFragment.class)   // essa página recebe o índice 1
                 .create()
         );
-        ViewPager viewPager = findViewById(R.id.viewPager);
+        final ViewPager viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter( adapter ); //os fragmentos ficam dentro do viewpager
 
         SmartTabLayout viewPagerTab = findViewById(R.id.viewPagerTab);
@@ -83,13 +83,27 @@ public class MainActivity extends AppCompatActivity {
             public boolean onQueryTextChange(String newText) {
                 //aqui é executando em tempo de escrita
 
-                ConversasFragment fragment = (ConversasFragment) adapter.getPage( 0 );
-                if( newText != null && newText.isEmpty()){
-
-                    fragment.pesquisarConversas( newText.toLowerCase() ); //passa o texto digitado tudo em minúsculas
-
+                //O fragment CONVERSAS é o número 0 e o fragment CONTATOS é o número 1
+                switch( viewPager.getCurrentItem() ) {
+                    case 0: //CONVERSAS
+                        ConversasFragment conversasFragment = (ConversasFragment) adapter.getPage(0);
+                        if( newText != null && newText.isEmpty()){
+                            conversasFragment.pesquisarConversas( newText.toLowerCase() ); //passa o texto digitado tudo em minúsculas
+                        } else {
+                            //Aqui é caso o usuário não tenha digitado nada, portanto a caixa de texto está vazia
+                            conversasFragment.recarregarConversas();
+                        }
+                        break;
+                    case 1: //CONTATOS
+                        ContatosFragment contatosFragment = (ContatosFragment) adapter.getPage(1);
+                        if( newText != null && newText.isEmpty()){
+                            contatosFragment.pesquisarContatos( newText.toLowerCase() ); //passa o texto digitado tudo em minúsculas
+                        } else {
+                            //Aqui é caso o usuário não tenha digitado nada, portanto a caixa de texto está vazia
+                            contatosFragment.recarregarContatos();
+                        }
+                        break;
                 }
-
 
                 return true;
             }

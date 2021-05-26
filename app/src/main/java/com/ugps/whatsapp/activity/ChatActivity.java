@@ -224,16 +224,47 @@ public class ChatActivity extends AppCompatActivity {
                                     //recuperando a url da imagem
                                     String downloadUrl = task.getResult().toString();
 
-                                    Mensagem mensagem = new Mensagem();
-                                    mensagem.setIdUsuario( idUsuarioRemetente );
-                                    mensagem.setMensagem("imagem.jpeg");
-                                    mensagem.setImagem( downloadUrl );
+                                    //Configurando enviar imagem em grupos
+                                    if( usuarioDestinatario != null ){
+                                        //MENSAGEM NORMAL
 
-                                    //Salvar mensagem para o remetente
-                                    salvarMensagem( idUsuarioRemetente , idUsuarioDestinatario , mensagem );
+                                        Mensagem mensagem = new Mensagem();
+                                        mensagem.setIdUsuario( idUsuarioRemetente );
+                                        mensagem.setMensagem("imagem.jpeg");
+                                        mensagem.setImagem( downloadUrl );
 
-                                    //Salvar mensagem para o destinatario
-                                    salvarMensagem( idUsuarioDestinatario , idUsuarioRemetente , mensagem );
+                                        //Salvar mensagem para o remetente
+                                        salvarMensagem( idUsuarioRemetente , idUsuarioDestinatario , mensagem );
+
+                                        //Salvar mensagem para o destinatario
+                                        salvarMensagem( idUsuarioDestinatario , idUsuarioRemetente , mensagem );
+
+
+                                    } else {
+                                        //MENSAGEM EM GRUPO
+
+                                        for ( Usuario membro: grupo.getMembros() ){
+                                            //PARA CADA MEMBRO DO GRUPO, VOU CRIAR UMA CONVERSA
+
+                                            String idRemetenteGrupo = Base64Custom.codificarBase64( membro.getEmail() );
+                                            String idUsuarioLogadoGrupo = UsuarioFirebase.getIdentificadorUsuario();
+
+                                            Mensagem mensagem = new Mensagem();
+                                            mensagem.setIdUsuario( idUsuarioLogadoGrupo );
+                                            mensagem.setMensagem( "imagem.jpg" );
+                                            mensagem.setNome( usuarioRemetente.getNome() );
+                                            mensagem.setImagem( downloadUrl );
+
+                                            //salvar mensagem para o membro
+                                            salvarMensagem( idRemetenteGrupo, idUsuarioDestinatario, mensagem );
+
+                                            //salvar conversa para o grupo
+                                            salvarConversa( idRemetenteGrupo, idUsuarioDestinatario, usuarioDestinatario, mensagem , true );
+
+                                        }
+
+
+                                    }
 
                                     Toast.makeText(ChatActivity.this, "Sucesso ao enviar imagem!", Toast.LENGTH_SHORT).show();
 
@@ -301,8 +332,6 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
 
-
-
         } else {
             Toast.makeText(this, "Erro, texto vazio!", Toast.LENGTH_SHORT).show();
         }
@@ -369,6 +398,8 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void recuperarMensagens(){
+
+        mensagens.clear(); //isso evita a duplicidade dos valores caso o usuário volte pelo "voltar" do android e não do app
 
         childEventListenerMensagens = mensagensRef.addChildEventListener(new ChildEventListener() {
             @Override

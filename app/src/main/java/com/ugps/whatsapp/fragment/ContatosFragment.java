@@ -23,12 +23,15 @@ import com.ugps.whatsapp.R;
 import com.ugps.whatsapp.activity.ChatActivity;
 import com.ugps.whatsapp.activity.GrupoActivity;
 import com.ugps.whatsapp.adapter.ContatosAdapter;
+import com.ugps.whatsapp.adapter.ConversasAdapter;
 import com.ugps.whatsapp.config.ConfiguracaoFirebase;
 import com.ugps.whatsapp.helper.RecyclerItemClickListener;
 import com.ugps.whatsapp.helper.UsuarioFirebase;
+import com.ugps.whatsapp.model.Conversa;
 import com.ugps.whatsapp.model.Usuario;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class ContatosFragment extends Fragment {
@@ -77,6 +80,7 @@ public class ContatosFragment extends Fragment {
                             @Override
                             public void onItemClick(View view, int position) {
 
+                                List<Usuario> listaUsuariosAtualizada = adapter.getContatos();
                                 Usuario usuarioSelecionado = listaContatos.get(position);
 
                                 boolean cabecalho = usuarioSelecionado.getEmail().isEmpty(); //se eu clicar no "novo grupo", vou saber que é ele pois o e-mail está vazio
@@ -111,12 +115,7 @@ public class ContatosFragment extends Fragment {
                 )
         );
 
-        //Criando grupos
-        Usuario itemGrupo = new Usuario();
-        itemGrupo.setNome("Novo grupo");
-        itemGrupo.setEmail("");
-
-        listaContatos.add( itemGrupo );
+        adicionarMenuNovoGrupo();
 
         return view;
 
@@ -146,6 +145,8 @@ public class ContatosFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                limparListaContatos();
+
                 for( DataSnapshot dados :  snapshot.getChildren() ){
 
                     Usuario usuario = dados.getValue( Usuario.class );
@@ -165,6 +166,49 @@ public class ContatosFragment extends Fragment {
             public void onCancelled(@NonNull DatabaseError error) {
             }
         });
+
+    }
+
+    public void pesquisarContatos( String texto ){
+
+        //Vamos percorrer a lista de Conversa existente e abastecer uma nova lista que faça par com a pesquisa
+        List<Usuario> listaContatosBusca = new ArrayList<>();
+
+        for( Usuario usuario : listaContatosBusca ){
+
+            String nome = usuario.getNome().toLowerCase();
+            if( nome.contains(texto) ){
+                listaContatosBusca.add(usuario);
+            }
+        }
+            adapter = new ContatosAdapter( listaContatosBusca , getActivity() );
+            recyclerViewListaContatos.setAdapter( adapter );
+            adapter.notifyDataSetChanged();
+    }
+
+    public void recarregarContatos(){
+
+        adapter = new ContatosAdapter( listaContatos , getActivity() );
+        recyclerViewListaContatos.setAdapter( adapter );
+        adapter.notifyDataSetChanged();
+
+    }
+
+    public void limparListaContatos(){
+
+        listaContatos.clear();
+        adicionarMenuNovoGrupo();
+
+    }
+
+    public void adicionarMenuNovoGrupo(){
+
+        //Criando item para adicionar novo grupo que ficará no topo da lista
+        Usuario itemGrupo = new Usuario();
+        itemGrupo.setNome("Novo grupo");
+        itemGrupo.setEmail("");
+
+        listaContatos.add( itemGrupo );
 
     }
 
